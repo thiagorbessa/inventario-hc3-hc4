@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Serviço do Banco de Dados MySQL
+  # Container do Banco de Dados MySQL
   mysql-db:
     image: mysql:8.0
     container_name: mysql_inventario
@@ -15,6 +15,28 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - inventario-net
+
+  # Container da Aplicação Spring Boot (Java 17)
+  app-inventario:
+    build: .
+    container_name: app_inventario
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/inventariodb?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: inventario_user
+      SPRING_DATASOURCE_PASSWORD: inventario_pass
+    networks:
+      - inventario-net
 
 volumes:
   mysql_data:
+
+networks:
+  inventario-net:
+    driver: bridge
