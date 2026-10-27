@@ -26,8 +26,9 @@ public class UsuarioController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MASTER')")
-    public ResponseEntity<List<UsuarioDTO>> listar() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
+    public ResponseEntity<List<UsuarioDTO>> listar(@AuthenticationPrincipal UserDetails userDetails) {
+        Usuario logado = usuarioRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+        return ResponseEntity.ok(usuarioService.listarPorUsuarioLogado(logado));
     }
 
     @GetMapping("/{id}")

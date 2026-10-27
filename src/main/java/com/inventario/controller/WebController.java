@@ -182,24 +182,32 @@ public class WebController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MASTER')")
     public String listarUsuarios(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         Usuario logado = usuarioRepository.findByUsername(userDetails.getUsername()).orElseThrow();
-        model.addAttribute("usuarios", usuarioService.listarTodos());
+
+        // Passa os usuários filtrados dependendo da Role de quem está logado (ADMIN só vê VISUALIZADOR)
+        model.addAttribute("usuarios", usuarioService.listarPorUsuarioLogado(logado));
         model.addAttribute("usuarioLogado", logado);
         return "usuarios/listar-usuarios";
     }
 
     @GetMapping("/usuarios/novo")
     @PreAuthorize("hasAnyRole('ADMIN', 'MASTER')")
-    public String novoUsuario(Model model) {
+    public String novoUsuario(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        Usuario logado = usuarioRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+
         model.addAttribute("usuario", new UsuarioDTO());
+        model.addAttribute("usuarioLogado", logado);
         model.addAttribute("roles", Role.values());
         return "usuarios/formulario";
     }
 
     @GetMapping("/usuarios/editar/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MASTER')")
-    public String editarUsuario(@PathVariable Long id, Model model) {
+    public String editarUsuario(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        Usuario logado = usuarioRepository.findByUsername(userDetails.getUsername()).orElseThrow();
         UsuarioDTO dto = usuarioService.buscarPorId(id);
+
         model.addAttribute("usuario", dto);
+        model.addAttribute("usuarioLogado", logado);
         model.addAttribute("roles", Role.values());
         return "usuarios/formulario";
     }

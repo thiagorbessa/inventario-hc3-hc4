@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -25,6 +26,22 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioMapper mapper;
+
+    // --- LISTAGEM FILTRADA CONFORME QUEM ESTÁ LOGADO ---
+    public List<UsuarioDTO> listarPorUsuarioLogado(Usuario usuarioLogado) {
+        List<Usuario> todos = usuarioRepository.findAll();
+
+        if (usuarioLogado.getRole() == Role.ROLE_MASTER) {
+            // MASTER visualiza todas as contas (MASTER, ADMIN, VISUALIZADOR)
+            return mapper.toDTOList(todos);
+        } else {
+            // ADMIN visualiza apenas contas que NÃO SEJAM MASTER (ou seja, ADMIN e VISUALIZADOR)
+            List<Usuario> filtrados = todos.stream()
+                    .filter(u -> u.getRole() != Role.ROLE_MASTER)
+                    .collect(Collectors.toList());
+            return mapper.toDTOList(filtrados);
+        }
+    }
 
     public List<UsuarioDTO> listarTodos() {
         return mapper.toDTOList(usuarioRepository.findAll());
@@ -50,7 +67,11 @@ public class UsuarioService {
 
             usuarioExistente.setNome(dto.getNome());
             usuarioExistente.setUsername(dto.getUsername());
-            usuarioExistente.setRole(dto.getRole());
+
+            // Apenas MASTER pode alterar Perfis de Acesso
+            if (usuarioLogado.getRole() == Role.ROLE_MASTER) {
+                usuarioExistente.setRole(dto.getRole());
+            }
 
             // Atualiza a senha apenas se informada no formulário
             if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
@@ -61,8 +82,9 @@ public class UsuarioService {
 
         } else {
             // --- CRIAÇÃO DE NOVO USUÁRIO ---
-            if (usuarioLogado.getRole() == Role.ROLE_ADMIN && dto.getRole() != Role.ROLE_VISUALIZADOR) {
-                throw new AccessDeniedException("Administradores só podem cadastrar novos usuários com perfil VISUALIZADOR.");
+            if (usuarioLogado.getRole() == Role.ROLE_ADMIN) {
+                // ADMIN força sempre a criação com perfil VISUALIZADOR
+                dto.setRole(Role.ROLE_VISUALIZADOR);
             }
 
             if (usuarioRepository.findByUsername(dto.getUsername()).isPresent()) {

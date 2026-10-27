@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Formulário de Usuário</title>
+    <title>Formulário de Usuário - Inventário TI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -43,7 +43,8 @@
                     <input type="password" th:field="*{password}" class="form-control" th:required="${usuario.id == null}" placeholder="******">
                 </div>
 
-                <div class="mb-4">
+                <!-- Se for MASTER: Exibe a seleção completa de perfis -->
+                <div class="mb-4" th:if="${usuarioLogado.role.name() == 'ROLE_MASTER'}">
                     <label class="form-label fw-bold">Perfil de Acesso</label>
                     <select th:field="*{role}" class="form-select" required>
                         <option value="">Selecione o perfil...</option>
@@ -51,8 +52,15 @@
                         <option value="ROLE_ADMIN">ADMINISTRADOR (CRUD Equipamentos e Usuários Comuns)</option>
                         <option value="ROLE_MASTER">MASTER (Acesso Total + CRUD Admins)</option>
                     </select>
+                </div>
+
+                <!-- Se for ADMIN: Trava o perfil em VISUALIZADOR -->
+                <div class="mb-4" th:if="${usuarioLogado.role.name() != 'ROLE_MASTER'}">
+                    <input type="hidden" name="role" value="ROLE_VISUALIZADOR" />
+                    <label class="form-label fw-bold">Perfil de Acesso</label>
+                    <input type="text" class="form-control" value="VISUALIZADOR (Apenas visualiza)" readonly>
                     <div class="form-text mt-1 text-muted">
-                        <small>* Administradores comuns só têm permissão para atribuir ou editar o perfil VISUALIZADOR.</small>
+                        <small>Administradores só têm permissão para criar e gerenciar perfis do tipo VISUALIZADOR.</small>
                     </div>
                 </div>
 
