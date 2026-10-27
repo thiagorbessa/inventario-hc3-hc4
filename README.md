@@ -1,102 +1,20 @@
-📦 Sistema de Inventário TI — HC3 e HC4
-Sistema web desenvolvido em Spring Boot (Java 17), Thymeleaf, Bootstrap 5 e MySQL para gestão, mesclagem e consulta do inventário de computadores e monitores das unidades HC3 e HC4.
-
-🚀 Como Iniciar o Sistema (Passo a Passo)
-📌 Pré-requisitos
-Antes de iniciar, certifique-se de ter instalado em sua máquina:
-
-Docker Desktop (aberto e com o serviço Engine Running em verde).
-
-Git (para clonar e atualizar o repositório).
-
-1️⃣ Clonar o Repositório
-Abra o terminal (PowerShell ou Prompt de Comando) e clone o projeto:
-
-PowerShell
-git clone https://github.com/thiagorbessa/inventario-hc3-hc4.git
+🖥️ Inventário Unificado de TI (HC3 & HC4)Sistema de gerenciamento e auditoria de inventários de equipamentos de TI unificado para as unidades HC3 e HC4.🚀 Tecnologias UtilizadasBackend: Java 17, Spring Boot, Spring Data JPA, Spring SecurityFrontend: Thymeleaf, Bootstrap 5, FontAwesomeBanco de Dados: MySQL 8.0 (Containerizado via Docker Compose)Documentação & Observabilidade: Springdoc OpenAPI (Swagger UI)Persistência & Logs: Auditoria completa de ações (CRUD / Importações) via LogSistema✨ Funcionalidades Principais📊 Dashboard Interativo: Visualização de totalizadores com tooltip individual por unidade (HC3 x HC4), Health Check de servidor (Uptime e Memória RAM) e atalho dinâmico para filtragem de base.🔍 Filtragem Avançada: Sistema de busca híbrido (Busca Geral + Painel de Filtro Detalhado multicritério por Unidade, Netname, Modelo, Local e Andar).↕️ Ordenação em Tempo Real: Ordenação crescente/decrescente (A-Z/Z-A) direto nos cabeçalhos da tabela com suporte a sticky header.📂 Importação/Exportação: Processamento de planilhas Excel (.xlsx) e colagem direta de texto do Excel com mesclagem inteligente de dados; exportação respeitando estritamente o estado filtrado na tela.🔐 Segurança e Auditoria: Controle de acesso por perfil (ADMIN, MASTER), gestão de usuários e página de registros de logs exclusiva para perfil MASTER.🛠️ Como Iniciar o Sistema (Passo a Passo)📌 Pré-requisitosAntes de iniciar, certifique-se de ter instalado em sua máquina:Docker Desktop (aberto e com o status Engine Running em verde).Git (para clonar e atualizar o repositório).1️⃣ Clonar o RepositórioAbra o terminal (PowerShell ou Prompt de Comando) e execute:PowerShellgit clone https://github.com/thiagorbessa/inventario-hc3-hc4.git
 cd inventario-hc3-hc4
-2️⃣ Configurar as Variáveis de Ambiente (.env)
-O projeto utiliza um arquivo .env para manter as credenciais do banco de dados seguras fora do repositório público.
-
-Na raiz do projeto, copie o arquivo de exemplo .env.example para .env:
-
-No PowerShell:
-
-PowerShell
-copy .env.example .env
-Caso queira alterar as senhas padrão do banco MySQL local, abra o arquivo .env gerado e defina suas credenciais:
-
-Snippet de código
-MYSQL_ROOT_PASSWORD=sua_senha_root_aqui
+2️⃣ Configurar as Variáveis de Ambiente (.env)O projeto utiliza um arquivo .env para manter as credenciais do banco de dados seguras e fora do controle de versão.Na raiz do projeto, copie o arquivo de exemplo .env.example para .env:PowerShellcopy .env.example .env
+(Opcional) Abra o arquivo .env gerado e defina suas credenciais locais:Snippet de códigoMYSQL_ROOT_PASSWORD=sua_senha_root_aqui
 MYSQL_DATABASE=inventariodb
 MYSQL_USER=inventario_user
 MYSQL_PASSWORD=sua_senha_usuario_aqui
-3️⃣ Compilar o Projeto (.jar)
-Para que o container do Spring Boot execute o código atualizado, gere o pacote executável .jar:
-
-No Windows (PowerShell):
-
-PowerShell
-.\mvnw clean package -DskipTests
-4️⃣ Executar o Sistema
-🟢 Opção A: Via Script Automático (Mais Prático no Windows)
-Na pasta do projeto, dê duplo clique no arquivo iniciar-sistema.bat (ou execute no terminal):
-
-DOS
-.\iniciar-sistema.bat
-O que o script faz automaticamente:
-
-Liga o container do MySQL no Docker.
-
-Sobe a aplicação Spring Boot em um container isolado.
-
-Aguarda os serviços iniciarem.
-
-Abre o navegador na tela inicial em http://localhost:8080.
-
-🐳 Opção B: Via Terminal Docker Direct
-Se preferir subir manualmente pelo Docker Compose:
-
-PowerShell
+3️⃣ Compilar o Pacote Executável (.jar)Para que o container Java execute a versão mais recente da aplicação:PowerShell.\mvnw clean package -DskipTests
+4️⃣ Executar a Aplicação🟢 Opção A: Execução Automática via Script (iniciar-sistema.bat)Na pasta do projeto, dê duplo clique no arquivo iniciar-sistema.bat (ou execute no terminal):DOS.\iniciar-sistema.bat
+O script realiza automaticamente:Inicia o container do banco de dados MySQL no Docker.Sobe a aplicação Spring Boot em um container Java 17 isolado.Aguarda os serviços inicializarem.Abre o navegador padrão no endereço http://localhost:8080.🐳 Opção B: Execução via Terminal Docker DirectSe preferir subir manualmente pelo Docker Compose:PowerShelldocker-compose up -d --build
+Após a inicialização, acesse http://localhost:8080 no seu navegador.🌐 Acesso Remoto e Externo via ngrokCaso precise liberar o acesso temporário ao sistema pela internet (para testes em celulares ou acesso fora da rede local) sem abrir portas no roteador, utilize o ngrok.1. Configuração Inicial do ngrokBaixe o executável em ngrok.com/download e extraia na raiz do projeto (ou adicione ao PATH do Windows).Crie uma conta gratuita no ngrok e autentique o seu token no terminal:PowerShell.\ngrok config add-authtoken SEU_AUTHTOKEN_AQUI
+2. Iniciar o Túnel PúblicoCom a aplicação rodando no Docker na porta 8080, execute:   PowerShell.\ngrok http 8080
+O ngrok exibirá a URL pública gerada no terminal:PlaintextForwarding     https://xxxx-xxx-xxx.ngrok-free.app -> http://localhost:8080
+Copie a URL gerada ([https://...ngrok-free.app](https://...ngrok-free.app)) e compartilhe para acesso externo.Ao acessar pela primeira vez, clique no botão "Visit Site" na tela de aviso do ngrok para carregar o sistema.🔑 Acesso Inicial ao SistemaAo acessar a aplicação pela primeira vez, utilize as credenciais padrão de administrador:URL Local: http://localhost:8080Usuário: adminSenha: admin🔧 Comandos Úteis e ManutençãoVerificar o status dos containers em execução:PowerShelldocker ps
+Parar a aplicação preservando todos os dados gravados:PowerShelldocker-compose stop
+Reconstruir os containers do zero (após alterar senhas do .env):PowerShelldocker-compose down -v
 docker-compose up -d --build
-Após subir os containers, acesse http://localhost:8080 no seu navegador.
-
-🔑 Acesso Inicial ao Sistema
-Ao abrir a aplicação no navegador pela primeira vez, utilize as credenciais padrão de administrador:
-
-URL: http://localhost:8080
-
-Usuário: admin
-
-Senha: admin
-
-🛠️ Comandos Úteis e Manutenção
-Verificar o status dos containers em execução:
-
-PowerShell
-docker ps
-Parar a aplicação sem perder os dados do banco:
-
-PowerShell
-docker-compose stop
-Reiniciar alterando senhas do .env (limpa e reconstrói o banco do zero):
-
-PowerShell
-docker-compose down -v
-docker-compose up -d --build
-💻 Tecnologias Utilizadas
-Java 17 / Spring Boot 3 (Spring Security, Spring Data JPA, OpenPOI)
-
-MySQL 8.0 (Containerizado via Docker)
-
-Thymeleaf + Bootstrap 5 (Frontend Responsivo)
-
-Docker & Docker Compose
-
-📥 Atualizar as alterações no GitHub
-Para salvar este novo README.md atualizado no seu GitHub, basta rodar no terminal:
-
-PowerShell
-git add README.md
-git commit -m "docs: adiciona instrucoes passo a passo de inicializacao no README.md"
+📥 Salvar e Atualizar no GitHubPara publicar a documentação atualizada no repositório, execute no terminal:PowerShellgit add README.md
+git commit -m "docs: atualiza README.md com instrucoes de inicializacao e acesso remoto via ngrok"
 git push origin main
