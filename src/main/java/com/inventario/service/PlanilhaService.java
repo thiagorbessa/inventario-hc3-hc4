@@ -86,7 +86,10 @@ public class PlanilhaService {
             eq = equipamentoRepository.findById(patrimonio).orElse(null);
         }
         if (eq == null) {
-            eq = equipamentoRepository.findByNetnameIgnoreCase(netname).orElse(null);
+            List<Equipamento> duplicados = equipamentoRepository.findByNetnameIgnoreCase(netname);
+            if (!duplicados.isEmpty()) {
+                eq = duplicados.get(0); // Pega o primeiro registro encontrado
+            }
         }
 
         if (eq == null) {

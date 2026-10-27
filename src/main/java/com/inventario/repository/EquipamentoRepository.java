@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface EquipamentoRepository extends JpaRepository<Equipamento, String> {
@@ -21,6 +20,6 @@ public interface EquipamentoRepository extends JpaRepository<Equipamento, String
     List<Equipamento> findByPatrimonioMonitor(String patrimonioMonitor);
 
     // Permite buscar um equipamento pelo Netname para fazer o "Merge" (Mesclagem)
-    Optional<Equipamento> findByNetnameIgnoreCase(String netname);
+    List<Equipamento> findByNetnameIgnoreCase(String netname);
 
 }
