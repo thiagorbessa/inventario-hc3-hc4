@@ -1,20 +1,119 @@
-🖥️ Inventário Unificado de TI (HC3 & HC4)Sistema de gerenciamento e auditoria de inventários de equipamentos de TI unificado para as unidades HC3 e HC4.🚀 Tecnologias UtilizadasBackend: Java 17, Spring Boot, Spring Data JPA, Spring SecurityFrontend: Thymeleaf, Bootstrap 5, FontAwesomeBanco de Dados: MySQL 8.0 (Containerizado via Docker Compose)Documentação & Observabilidade: Springdoc OpenAPI (Swagger UI)Persistência & Logs: Auditoria completa de ações (CRUD / Importações) via LogSistema✨ Funcionalidades Principais📊 Dashboard Interativo: Visualização de totalizadores com tooltip individual por unidade (HC3 x HC4), Health Check de servidor (Uptime e Memória RAM) e atalho dinâmico para filtragem de base.🔍 Filtragem Avançada: Sistema de busca híbrido (Busca Geral + Painel de Filtro Detalhado multicritério por Unidade, Netname, Modelo, Local e Andar).↕️ Ordenação em Tempo Real: Ordenação crescente/decrescente (A-Z/Z-A) direto nos cabeçalhos da tabela com suporte a sticky header.📂 Importação/Exportação: Processamento de planilhas Excel (.xlsx) e colagem direta de texto do Excel com mesclagem inteligente de dados; exportação respeitando estritamente o estado filtrado na tela.🔐 Segurança e Auditoria: Controle de acesso por perfil (ADMIN, MASTER), gestão de usuários e página de registros de logs exclusiva para perfil MASTER.🛠️ Como Iniciar o Sistema (Passo a Passo)📌 Pré-requisitosAntes de iniciar, certifique-se de ter instalado em sua máquina:Docker Desktop (aberto e com o status Engine Running em verde).Git (para clonar e atualizar o repositório).1️⃣ Clonar o RepositórioAbra o terminal (PowerShell ou Prompt de Comando) e execute:PowerShellgit clone https://github.com/thiagorbessa/inventario-hc3-hc4.git
+# 🖥️ Inventário Unificado de TI (HC3 & HC4)
+
+Sistema de gerenciamento e auditoria de inventários de equipamentos de TI unificado para as unidades **HC3** e **HC4**.
+
+---
+
+## 🚀 Tecnologias Utilizadas
+
+* **Backend:** Java 17, Spring Boot, Spring Data JPA, Spring Security
+* **Frontend:** Thymeleaf, Bootstrap 5, FontAwesome
+* **Banco de Dados:** MySQL 8.0 (Containerizado via Docker Compose)
+* **Documentação & Observabilidade:** Springdoc OpenAPI (Swagger UI)
+* **Persistência & Logs:** Auditoria completa de ações (CRUD / Importações) via `LogSistema`
+
+---
+
+## ✨ Funcionalidades Principais
+
+* 📊 **Dashboard Interativo:** Visualização de totalizadores com tooltip individual por unidade (HC3 x HC4), Health Check de servidor (Uptime e Memória RAM) e atalho dinâmico para filtragem de base.
+* 🔍 **Filtragem Avançada:** Sistema de busca híbrido (Busca Geral + Painel de Filtro Detalhado multicritério por Unidade, Netname, Modelo, Local e Andar).
+* ↕️ **Ordenação em Tempo Real:** Ordenação crescente/decrescente (A-Z/Z-A) direto nos cabeçalhos da tabela com suporte a *sticky header*.
+* 📂 **Importação/Exportação:** Processamento de planilhas Excel (`.xlsx`) e colagem direta de texto do Excel com mesclagem inteligente de dados; exportação respeitando estritamente o estado filtrado na tela.
+* 🔐 **Segurança e Auditoria:** Controle de acesso por perfil (`ADMIN`, `MASTER`), gestão de usuários e página de registros de logs exclusiva para perfil `MASTER`.
+
+---
+
+## 🛠️ Como Iniciar o Sistema (Passo a Passo)
+
+### 📌 Pré-requisitos
+
+Antes de iniciar, certifique-se de ter instalado em sua máquina:
+1. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (aberto e com o status *Engine Running* em verde).
+2. **Git** (para clonar e atualizar o repositório).
+
+---
+```powershell
+### 1️⃣ Clonar o Repositório
+
+Abra o terminal (PowerShell ou Prompt de Comando) e execute:
+
+
+git clone [https://github.com/thiagorbessa/inventario-hc3-hc4.git](https://github.com/thiagorbessa/inventario-hc3-hc4.git)
 cd inventario-hc3-hc4
-2️⃣ Configurar as Variáveis de Ambiente (.env)O projeto utiliza um arquivo .env para manter as credenciais do banco de dados seguras e fora do controle de versão.Na raiz do projeto, copie o arquivo de exemplo .env.example para .env:PowerShellcopy .env.example .env
-(Opcional) Abra o arquivo .env gerado e defina suas credenciais locais:Snippet de códigoMYSQL_ROOT_PASSWORD=sua_senha_root_aqui
+
+###2️⃣ Configurar as Variáveis de Ambiente (.env)
+O projeto utiliza um arquivo .env para manter as credenciais do banco de dados seguras e fora do controle de versão.
+
+Na raiz do projeto, copie o arquivo de exemplo .env.example para .env:
+PowerShell
+copy .env.example .env
+
+(Opcional) Abra o arquivo .env gerado e defina suas credenciais locais:
+
+Snippet de código
+MYSQL_ROOT_PASSWORD=sua_senha_root_aqui
 MYSQL_DATABASE=inventariodb
 MYSQL_USER=inventario_user
 MYSQL_PASSWORD=sua_senha_usuario_aqui
-3️⃣ Compilar o Pacote Executável (.jar)Para que o container Java execute a versão mais recente da aplicação:PowerShell.\mvnw clean package -DskipTests
-4️⃣ Executar a Aplicação🟢 Opção A: Execução Automática via Script (iniciar-sistema.bat)Na pasta do projeto, dê duplo clique no arquivo iniciar-sistema.bat (ou execute no terminal):DOS.\iniciar-sistema.bat
-O script realiza automaticamente:Inicia o container do banco de dados MySQL no Docker.Sobe a aplicação Spring Boot em um container Java 17 isolado.Aguarda os serviços inicializarem.Abre o navegador padrão no endereço http://localhost:8080.🐳 Opção B: Execução via Terminal Docker DirectSe preferir subir manualmente pelo Docker Compose:PowerShelldocker-compose up -d --build
-Após a inicialização, acesse http://localhost:8080 no seu navegador.🌐 Acesso Remoto e Externo via ngrokCaso precise liberar o acesso temporário ao sistema pela internet (para testes em celulares ou acesso fora da rede local) sem abrir portas no roteador, utilize o ngrok.1. Configuração Inicial do ngrokBaixe o executável em ngrok.com/download e extraia na raiz do projeto (ou adicione ao PATH do Windows).Crie uma conta gratuita no ngrok e autentique o seu token no terminal:PowerShell.\ngrok config add-authtoken SEU_AUTHTOKEN_AQUI
-2. Iniciar o Túnel PúblicoCom a aplicação rodando no Docker na porta 8080, execute:   PowerShell.\ngrok http 8080
-O ngrok exibirá a URL pública gerada no terminal:PlaintextForwarding     https://xxxx-xxx-xxx.ngrok-free.app -> http://localhost:8080
-Copie a URL gerada ([https://...ngrok-free.app](https://...ngrok-free.app)) e compartilhe para acesso externo.Ao acessar pela primeira vez, clique no botão "Visit Site" na tela de aviso do ngrok para carregar o sistema.🔑 Acesso Inicial ao SistemaAo acessar a aplicação pela primeira vez, utilize as credenciais padrão de administrador:URL Local: http://localhost:8080Usuário: adminSenha: admin🔧 Comandos Úteis e ManutençãoVerificar o status dos containers em execução:PowerShelldocker ps
-Parar a aplicação preservando todos os dados gravados:PowerShelldocker-compose stop
-Reconstruir os containers do zero (após alterar senhas do .env):PowerShelldocker-compose down -v
+
+###3️⃣ Compilar o Pacote Executável (.jar)
+Para que o container Java execute a versão mais recente da aplicação:
+
+PowerShell
+.\mvnw clean package -DskipTests
+
+###4️⃣ Executar a Aplicação
+🟢 Opção A: Execução Automática via Script (iniciar-sistema.bat)
+Na pasta do projeto, dê duplo clique no arquivo iniciar-sistema.bat (ou execute no terminal):
+
+DOS
+.\iniciar-sistema.bat
+O script realiza automaticamente:
+
+Inicia o container do banco de dados MySQL no Docker.
+
+Sobe a aplicação Spring Boot em um container Java 17 isolado.
+
+Aguarda os serviços inicializarem.
+
+Abre o navegador padrão no endereço http://localhost:8080.
+
+🐳 Opção B: Execução via Terminal Docker Direct
+Se preferir subir manualmente pelo Docker Compose:
+
+PowerShell
 docker-compose up -d --build
-📥 Salvar e Atualizar no GitHubPara publicar a documentação atualizada no repositório, execute no terminal:PowerShellgit add README.md
-git commit -m "docs: atualiza README.md com instrucoes de inicializacao e acesso remoto via ngrok"
-git push origin main
+Após a inicialização, acesse http://localhost:8080 no seu navegador.
+
+###🌐 Acesso Remoto e Externo via ngrok
+Caso precise liberar o acesso temporário ao sistema pela internet (para testes em celulares ou acesso fora da rede local) sem abrir portas no roteador, utilize o ngrok.
+
+1. Configuração Inicial do ngrok
+Baixe o executável em ngrok.com/download e extraia na raiz do projeto.
+
+Crie uma conta gratuita no ngrok e autentique o seu token no terminal:
+
+PowerShell
+.\ngrok config add-authtoken SEU_AUTHTOKEN_AQUI
+2. Iniciar o Túnel Público
+Com a aplicação rodando no Docker na porta 8080, execute:
+
+PowerShell
+.\ngrok http 8080
+O ngrok exibirá a URL pública gerada no terminal:
+
+Plaintext
+Forwarding     [https://xxxx-xxx-xxx.ngrok-free.app](https://xxxx-xxx-xxx.ngrok-free.app) -> http://localhost:8080
+Copie a URL gerada (https://...ngrok-free.app) e compartilhe para acesso externo.
+
+Ao acessar pela primeira vez, clique no botão "Visit Site" na tela de aviso do ngrok para carregar o sistema.
+
+🔑 Acesso Inicial ao Sistema
+Ao acessar a aplicação pela primeira vez, utilize as credenciais padrão de administrador:
+
+URL Local: http://localhost:8080
+
+Usuário: admin
+
+Senha: admin
