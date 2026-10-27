@@ -109,6 +109,22 @@ Copie a URL gerada (https://...ngrok-free.app) e compartilhe para acesso externo
 
 Ao acessar pela primeira vez, clique no botão "Visit Site" na tela de aviso do ngrok para carregar o sistema.
 
+🌐 Acesso Remoto e Externo via ngrokO ngrok permite gerar um link público temporário (https://...ngrok-free.app) para acessar o sistema de qualquer lugar pela internet ou por dispositivos móveis (como celulares).
+
+1. Instalação do ngrokVia Microsoft Store (Recomendado): Procure por ngrok na Microsoft Store e instale.
+Ele será adicionado automaticamente às variáveis de ambiente (PATH) do Windows.
+Via Download direto: Baixe em ngrok.com/download e extraia na pasta do projeto.
+
+2. Autenticação (Apenas na primeira vez)Crie uma conta gratuita no site do ngrok, copie o seu token e execute no PowerShell/CMD:
+DOSngrok config add-authtoken SEU_AUTHTOKEN_AQUI
+
+3. Iniciar o Túnel RemotoCom o Docker Desktop rodando com o sistema na porta 8080, abra o PowerShell ou CMD e digite:
+DOSngrok http 8080
+Atenção: O ngrok é uma ferramenta de linha de comando (CLI). Não dê dois cliques no ngrok.exe, execute-o sempre pelo terminal.
+O terminal exibirá a URL pública gerada:   PlaintextForwarding     [https://xxxx-xxx-xxx.ngrok-free.app](https://xxxx-xxx-xxx.ngrok-free.app) -> http://localhost:8080
+Copie o link https://...ngrok-free.app e acesse de qualquer lugar.
+Na primeira visita, clique em "Visit Site" na tela de aviso do ngrok para acessar a tela de login do inventário.
+
 🔑 Acesso Inicial ao Sistema
 Ao acessar a aplicação pela primeira vez, utilize as credenciais padrão de administrador:
 
