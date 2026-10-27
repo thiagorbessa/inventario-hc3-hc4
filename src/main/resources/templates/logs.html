@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Logs - Inventário TI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+    <div class="container-fluid mx-4">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="fa-solid fa-server me-2 text-info"></i>Inventário Unificado HC3 / HC4
+        </a>
+        <div>
+            <a href="/" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left me-1"></i>Voltar ao Dashboard</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4">
+    <div class="card card-box bg-white p-4">
+        <h4 class="fw-bold text-secondary mb-3">
+            <i class="fa-solid fa-clock-rotate-left me-2 text-warning"></i>Histórico de Auditoria & Alterações do Sistema
+        </h4>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle small">
+                <thead class="table-dark">
+                <tr>
+                    <th>Data / Hora</th>
+                    <th>Usuário</th>
+                    <th>Ação Executada</th>
+                    <th>Detalhes da Alteração</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${logs == null or logs.isEmpty()}">
+                    <td colspan="4" class="text-center py-4 text-muted">Nenhum registro de log encontrado.</td>
+                </tr>
+                <tr th:each="log : ${logs}">
+                    <td class="font-monospace" th:text="${#temporals.format(log.dataHora, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                    <td class="fw-bold text-primary" th:text="${log.usuario}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${log.acao.contains('EXCLUIR')} ? 'bg-danger' : (${log.acao.contains('IMPORTAR')} ? 'bg-info text-dark' : 'bg-success')"
+                              th:text="${log.acao}">
+                        </span>
+                    </td>
+                    <td th:text="${log.detalhe}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

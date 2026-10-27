@@ -1,0 +1,169 @@
+/* ==========================================
+   CONFIGURAÇÕES GERAIS E RESET
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+    color: #333;
+}
+/* Fixar cabeçalho com barra de rolagem na própria tabela */
+.table-responsive {
+    max-height: 70vh; /* Define altura máxima de 70% da tela */
+    overflow-y: auto;  /* Permite rolar internamente */
+}
+/* Cabeçalhos clicáveis para ordenação */
+.table-custom th {
+    cursor: pointer;
+    user-select: none;
+}
+
+.table-custom th:hover {
+    background-color: #1e293b !important;
+}
+.table-custom th {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   NAVBAR E MENU SUPERIOR
+   ========================================== */
+.navbar-custom {
+    background-color: #1e293b;
+    color: #ffffff;
+}
+
+.navbar-custom .navbar-brand {
+    font-weight: 700;
+}
+
+.navbar-custom .menu a {
+    color: #ecf0f1;
+    text-decoration: none;
+    margin-left: 20px;
+    font-weight: 500;
+}
+
+.navbar-custom .menu a:hover {
+    color: #38bdf8;
+}
+
+/* ==========================================
+   CARDS E CARDS INFORMATIVOS
+   ========================================== */
+.card-box {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   TABELAS E CABEÇALHO FIXO (STICKY HEADER)
+   ========================================== */
+.table-custom th {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    white-space: nowrap;
+
+    /* FIXAR CABEÇALHO NO TOPO AO ROLAR */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Linhas ÍMPARES Visíveis: Fundo Branco */
+.linha-impar > td {
+    background-color: #ffffff !important;
+}
+
+/* Linhas PARES Visíveis: Fundo Azul Suave */
+.linha-par > td {
+    background-color: #f0f9ff !important;
+}
+
+/* Efeito Hover (Ao passar o mouse por cima da linha) */
+.table-custom tbody tr:hover > td {
+    background-color: #e0f2fe !important;
+}
+
+/* Badges de Unidade */
+.badge-hc3 {
+    background-color: #0284c7;
+    color: #ffffff;
+}
+
+.badge-hc4 {
+    background-color: #0d9488;
+    color: #ffffff;
+}
+
+/* Status Incompleto (Alertas na Tabela) */
+.status-incompleto {
+    color: #dc2626;
+    font-weight: 600;
+    background-color: #fef2f2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.text-muted-empty {
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
+/* ==========================================
+   BOTÕES E FORMULÁRIOS
+   ========================================== */
+.btn-primary {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: #ffffff;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.form-control {
+    border-radius: 6px;
+}

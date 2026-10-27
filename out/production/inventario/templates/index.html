@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventário TI - HC3 & HC4</title>
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<!-- Menu Superior -->
+<nav class="navbar">
+    <a href="/" class="logo">Gerenciamento de Inventário Unificado</a>
+    <div class="menu">
+        <span sec:authentication="name" style="margin-right:20px; color:#f1c40f; font-weight:bold;"></span>
+        <a href="/">Dashboard</a>
+        <a sec:authorize="hasAnyRole('ADMIN', 'MASTER')" href="/usuarios">Gestão de Usuários</a>
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger" style="margin-left:15px;">Sair</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Inventário HC3 / HC4</h2>
+        <!-- Botão Novo apenas para ADMIN e MASTER -->
+        <a sec:authorize="hasAnyRole('ADMIN', 'MASTER')" href="/equipamentos/novo" class="btn btn-primary">
+            + Novo Equipamento
+        </a>
+    </div>
+
+    <!-- Barra de Busca Simplificada -->
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por patrimônio, IP ou local..." onkeyup="filtrarTabela()">
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Unidade</th>
+            <th>Patrimônio (Micro)</th>
+            <th>Netname</th>
+            <th>IP Micro</th>
+            <th>Local / Ramal</th>
+            <th>MAC Address</th>
+            <th>Monitor</th>
+            <th sec:authorize="hasAnyRole('ADMIN', 'MASTER')">Ações</th>
+        </tr>
+        </thead>
+        <tbody id="tabelaCorpo">
+        <!-- Se a lista estiver vazia (ainda não inseriu os dados das planilhas no BD) -->
+        <tr th:if="${equipamentos == null or equipamentos.isEmpty()}">
+            <td colspan="8" style="text-align:center;">Nenhum equipamento cadastrado. Importe as planilhas ou cadastre manualmente.</td>
+        </tr>
+
+        <!-- Iteração para exibir os equipamentos via Thymeleaf -->
+        <tr th:each="equip : ${equipamentos}">
+            <td th:text="${equip.unidade}">HCx</td>
+            <td th:text="${equip.patrimonioMicro}">12345</td>
+            <td th:text="${equip.netname}">DESKTOP-X</td>
+
+            <!-- Exibe "Incompleto" se não tiver IP -->
+            <td th:if="${equip.ipMicro != null and !equip.ipMicro.isEmpty()}" th:text="${equip.ipMicro}"></td>
+            <td th:unless="${equip.ipMicro != null and !equip.ipMicro.isEmpty()}" class="status-incompleto">Incompleto</td>
+
+            <td th:text="${equip.local + ' / ' + equip.ramal}">Local/Ramal</td>
+            <td th:text="${equip.macAddress}">00:00:00:00</td>
+            <td th:text="${equip.patrimonioMonitor != null ? equip.patrimonioMonitor : 'Sem Registro'}">Monitor</td>
+
+            <!-- Botões de Ação só aparecem se o usuário tiver permissão -->
+            <td sec:authorize="hasAnyRole('ADMIN', 'MASTER')">
+                <a th:href="@{/equipamentos/editar/{id}(id=${equip.patrimonioMicro})}" class="btn btn-warning" style="padding: 4px 8px;">✎ Editar</a>
+                <form th:action="@{/equipamentos/deletar/{id}(id=${equip.patrimonioMicro})}" method="post" style="display:inline;" onsubmit="return confirm('Deseja realmente apagar este equipamento?');">
+                    <button type="submit" class="btn btn-danger" style="padding: 4px 8px;">🗑 Excluir</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Script Simples de Filtro no Frontend -->
+<script>
+    function filtrarTabela() {
+        let input = document.getElementById("searchInput");
+        let filter = input.value.toUpperCase();
+        let table = document.getElementById("tabelaCorpo");
+        let tr = table.getElementsByTagName("tr");
+
+        for (let i = 0; i < tr.length; i++) {
+            if(tr[i].getElementsByTagName("td").length > 1) { // ignora linha "Nenhum equipamento"
+                let txtValue = tr[i].textContent || tr[i].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+</body>
+</html>

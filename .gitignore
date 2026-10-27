@@ -1,0 +1,16 @@
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IDEs e Editores ###
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+### Logs e Sistema ###
+*.log
+.DS_Store

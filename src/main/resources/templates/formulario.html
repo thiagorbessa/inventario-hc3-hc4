@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Equipamento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-4" style="max-width: 1000px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white p-3">
+            <h4 class="mb-0 fw-bold">
+                <i class="fa-solid fa-desktop me-2"></i>
+                <span th:text="${equipamento.patrimonioMicro == null ? 'Cadastrar Novo Equipamento' : 'Editar Equipamento'}"></span>
+            </h4>
+        </div>
+        <div class="card-body p-4">
+            <form th:action="@{/equipamentos/salvar}" th:object="${equipamento}" method="post">
+
+                <!-- Campo Oculto para identificar alteração do Patrimônio (Chave Primária) -->
+                <input type="hidden" name="patrimonioAntigo" th:value="*{patrimonioMicro}">
+
+                <!-- 1. DADOS DO MICRO -->
+                <h5 class="text-primary fw-bold mb-3"><i class="fa-solid fa-computer me-2"></i>1. Informações do Computador (Micro)</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Patrimônio Micro (ID)</label>
+                        <!-- Campo editável mesmo em edições -->
+                        <input type="text" th:field="*{patrimonioMicro}" class="form-control" required placeholder="Ex: 805703">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Unidade</label>
+                        <select th:field="*{unidade}" class="form-select" required>
+                            <option value="">Selecione a Unidade...</option>
+                            <option value="HC3">HC3</option>
+                            <option value="HC4">HC4</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Netname</label>
+                        <input type="text" th:field="*{netname}" class="form-control" placeholder="Ex: HC3-ADM-01">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Modelo Micro</label>
+                        <input type="text" th:field="*{modeloMicro}" class="form-control" placeholder="Ex: OptiPlex 3080">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Service Tag Micro</label>
+                        <input type="text" th:field="*{serviceTag}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Express Service</label>
+                        <input type="text" th:field="*{expressService}" class="form-control">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">Localização (Setor / Sala)</label>
+                        <input type="text" th:field="*{local}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Andar</label>
+                        <input type="text" th:field="*{andar}" class="form-control" placeholder="Ex: Térreo">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ramal</label>
+                        <input type="text" th:field="*{ramal}" class="form-control">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- 2. DADOS DO MONITOR -->
+                <h5 class="text-primary fw-bold mb-3"><i class="fa-solid fa-display me-2"></i>2. Informações do Monitor</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">Patrimônio Monitor</label>
+                        <input type="text" th:field="*{patrimonioMonitor}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Service Tag Monitor</label>
+                        <input type="text" th:field="*{serviceTagMonitor}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Série Monitor</label>
+                        <input type="text" th:field="*{serieMonitor}" class="form-control">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- 3. REDE E INFRAESTRUTURA -->
+                <h5 class="text-primary fw-bold mb-3"><i class="fa-solid fa-network-wired me-2"></i>3. Rede & Infraestrutura</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label">IP Micro</label>
+                        <input type="text" th:field="*{ipMicro}" class="form-control" placeholder="192.168.x.x">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">MAC Address</label>
+                        <input type="text" th:field="*{macAddress}" class="form-control" placeholder="00:00:00:00:00:00">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">IP Switch</label>
+                        <input type="text" th:field="*{ipSwitch}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Porta Switch</label>
+                        <input type="text" th:field="*{portaSwitch}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rack de Rede</label>
+                        <input type="text" th:field="*{rack}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Patch Panel</label>
+                        <input type="text" th:field="*{patchPanel}" class="form-control">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- 4. OBSERVAÇÕES -->
+                <h5 class="text-primary fw-bold mb-3"><i class="fa-solid fa-note-sticky me-2"></i>4. Observações Gerais</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <textarea th:field="*{obs}" class="form-control" rows="3" placeholder="Informações adicionais ou pendências..."></textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-primary px-5 fw-bold">Salvar Dados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

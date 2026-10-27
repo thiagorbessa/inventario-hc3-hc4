@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventário TI - HC3 & HC4</title>
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Arquivo CSS Externo via Thymeleaf -->
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<!-- Menu Superior Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm mb-4">
+    <div class="container-fluid mx-4">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="fa-solid fa-server me-2 text-info"></i>Inventário Unificado HC3 / HC4
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="navbar-text me-3 text-light">
+                <i class="fa-solid fa-circle-user me-1 text-warning"></i>
+                <strong sec:authentication="name">admin</strong>
+            </span>
+            <a sec:authorize="hasRole('MASTER')" href="/logs" class="btn btn-outline-warning btn-sm me-2">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i>Logs
+            </a>
+            <a sec:authorize="hasAnyRole('ADMIN', 'MASTER')" href="/usuarios" class="btn btn-outline-light btn-sm me-2">
+                <i class="fa-solid fa-users-gear me-1"></i>Usuários
+            </a>
+            <form th:action="@{/logout}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i>Sair
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- Conteúdo Principal -->
+<div class="container-fluid px-4">
+
+    <!-- Mensagens de Alerta (Sucesso / Erro) -->
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i><span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i><span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- CARDS INFORMATIVOS INTERATIVOS -->
+    <div class="row g-3 mb-4">
+        <!-- 1. TOTAL EQUIPAMENTOS -->
+        <div class="col-md-4">
+            <div class="card card-box bg-white p-3 border-start border-4 border-primary"
+                 data-bs-toggle="tooltip"
+                 data-bs-placement="top"
+                 th:title="'HC3: ' + ${totalHc3 != null ? totalHc3 : 0} + ' | HC4: ' + ${totalHc4 != null ? totalHc4 : 0}"
+                 style="cursor: pointer;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold">TOTAL EQUIPAMENTOS</span>
+                        <h3 class="fw-bold mb-0" th:text="${equipamentos != null ? equipamentos.size() : 0}">0</h3>
+                    </div>
+                    <i class="fa-solid fa-desktop fa-2x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SISTEMA ATIVO -->
+        <div class="col-md-4">
+            <div class="card card-box bg-white p-3 border-start border-4 border-info"
+                 data-bs-toggle="modal" data-bs-target="#modalHealthCheck"
+                 style="cursor: pointer;" title="Clique para ver o status de saúde do sistema">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold">SISTEMA ATIVO</span>
+                        <h3 class="fw-bold mb-0 text-success"><i class="fa-solid fa-check-circle me-1"></i>Online</h3>
+                    </div>
+                    <i class="fa-solid fa-heart-pulse fa-2x text-info opacity-50"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. BASE DE DADOS -->
+        <div class="col-md-4">
+            <div class="card card-box bg-white p-3 border-start border-4 border-warning"
+                 onclick="alternarFiltroBase()"
+                 style="cursor: pointer;" title="Clique para alternar o filtro de Unidade">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold">BASE DE DADOS</span>
+                        <h3 class="fw-bold mb-0 text-dark" id="labelBaseDados">HC3 & HC4 Unificados</h3>
+                    </div>
+                    <i class="fa-solid fa-database fa-2x text-warning opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela e Ações -->
+    <div class="card card-box bg-white p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-list me-2"></i>Lista Completa de Equipamentos Mapeados</h5>
+
+            <div sec:authorize="hasAnyRole('ADMIN', 'MASTER')">
+                <button type="button" onclick="exportarExcelFiltrado()"
+                        class="btn btn-success fw-bold shadow-sm me-2"
+                        data-bs-toggle="tooltip" data-bs-placement="bottom"
+                        title="Gera e baixa uma planilha Excel contendo apenas os dados atualmente filtrados na tela.">
+                    <i class="fa-solid fa-file-excel me-1"></i> Exportar Excel
+                </button>
+
+                <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Abre uma janela para colar linhas inteiras copiadas direto do Excel.">
+                    <button type="button" class="btn btn-dark fw-bold shadow-sm me-2"
+                            data-bs-toggle="modal" data-bs-target="#modalColarTexto">
+                        <i class="fa-solid fa-paste me-1"></i> Copiar / Colar Texto
+                    </button>
+                </span>
+
+                <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Permite enviar um arquivo .xlsx para mesclar novos dados à base de dados.">
+                    <button type="button" class="btn btn-secondary fw-bold shadow-sm me-2"
+                            data-bs-toggle="modal" data-bs-target="#modalImportar">
+                        <i class="fa-solid fa-file-import me-1"></i> Importar Excel
+                    </button>
+                </span>
+
+                <a href="/equipamentos/novo" class="btn btn-primary fw-bold shadow-sm"
+                   data-bs-toggle="tooltip" data-bs-placement="bottom"
+                   title="Abre o formulário para cadastrar um único computador manualmente.">
+                    <i class="fa-solid fa-plus me-1"></i> Novo Equipamento
+                </a>
+            </div>
+        </div>
+
+        <!-- PAINEL DE FILTRAGEM -->
+        <div class="card bg-light border-0 p-3 mb-4 shadow-sm">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="filterGeral" class="form-control border-start-0" placeholder="Filtragem geral (busque por qualquer dado: Patrimônio, IP, Local...)" onkeyup="filtrarTabela()">
+                    </div>
+                </div>
+                <div class="col-md-3 text-end">
+                    <button type="button" id="btnToggleFiltro" class="btn btn-outline-primary w-100 fw-bold" onclick="toggleFiltroDetalhado()">
+                        <i class="fa-solid fa-sliders me-1"></i> Filtragem mais detalhada
+                    </button>
+                </div>
+            </div>
+
+            <div id="painelFiltroDetalhado" class="row g-2 align-items-end mt-2 pt-2 border-top" style="display: none;">
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-building me-1"></i>Unidade</label>
+                    <select id="filterUnidade" class="form-select form-select-sm" onchange="sincronizarEFiltrar()">
+                        <option value="">Todas</option>
+                        <option value="HC3">HC3</option>
+                        <option value="HC4">HC4</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-computer me-1"></i>Netname</label>
+                    <input type="text" id="filterNetname" class="form-control form-control-sm" placeholder="Ex: HC3-ADM" onkeyup="filtrarTabela()">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-microchip me-1"></i>Modelo</label>
+                    <input type="text" id="filterModelo" class="form-control form-control-sm" placeholder="Ex: Optiplex" onkeyup="filtrarTabela()">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-location-dot me-1"></i>Local</label>
+                    <input type="text" id="filterLocal" class="form-control form-control-sm" placeholder="Ex: Recepção" onkeyup="filtrarTabela()">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-secondary mb-1"><i class="fa-solid fa-layer-group me-1"></i>Andar</label>
+                    <input type="text" id="filterAndar" class="form-control form-control-sm" placeholder="Ex: Térreo" onkeyup="filtrarTabela()">
+                </div>
+
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="limparFiltros()" title="Limpar Filtros">
+                        <i class="fa-solid fa-filter-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela com Cabeçalhos Clicáveis para Ordenação -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle table-custom small" id="tabelaEquipamentos">
+                <thead>
+                <tr>
+                    <th onclick="ordenarTabela(0)">Unidade <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(1)">Pat. Micro <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(2)">Netname <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(3)">Modelo <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(4)">Service Tag <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(5)">IP Micro <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(6)">MAC Address <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(7)">Local <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(8)">Andar <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(9)">Ramal <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(10)">Pat. Monitor <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(11)">IP Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(12)">Porta Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(13)">Rack <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(14)">Patch Panel <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(15)">Obs <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th sec:authorize="hasAnyRole('ADMIN', 'MASTER')" class="text-center">Ações</th>
+                </tr>
+                </thead>
+                <tbody id="tabelaCorpo">
+                <tr th:if="${equipamentos == null or equipamentos.isEmpty()}">
+                    <td colspan="17" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-folder-open fa-2x mb-2 d-block"></i>
+                        Nenhum equipamento cadastrado na base unificada.
+                    </td>
+                </tr>
+                <tr th:each="equip : ${equipamentos}">
+                    <td>
+                        <span class="badge" th:classappend="${equip.unidade == 'HC3'} ? 'badge-hc3' : 'badge-hc4'" th:text="${equip.unidade != null ? equip.unidade : 'HC3'}">HC3</span>
+                    </td>
+                    <td class="fw-bold text-dark" th:text="${equip.patrimonioMicro}">-</td>
+                    <td th:text="${equip.netname != null and !equip.netname.isEmpty() ? equip.netname : '-'}"></td>
+                    <td th:text="${equip.modeloMicro != null and !equip.modeloMicro.isEmpty() ? equip.modeloMicro : '-'}"></td>
+                    <td th:text="${equip.serviceTag != null and !equip.serviceTag.isEmpty() ? equip.serviceTag : '-'}"></td>
+                    <td th:text="${equip.ipMicro != null and !equip.ipMicro.isEmpty() ? equip.ipMicro : '-'}"></td>
+                    <td class="font-monospace" th:text="${equip.macAddress != null and !equip.macAddress.isEmpty() ? equip.macAddress : '-'}"></td>
+                    <td th:text="${equip.local != null and !equip.local.isEmpty() ? equip.local : '-'}"></td>
+                    <td th:text="${equip.andar != null and !equip.andar.isEmpty() ? equip.andar : '-'}"></td>
+                    <td th:text="${equip.ramal != null and !equip.ramal.isEmpty() ? equip.ramal : '-'}"></td>
+                    <td th:text="${equip.patrimonioMonitor != null and !equip.patrimonioMonitor.isEmpty() ? equip.patrimonioMonitor : '-'}"></td>
+                    <td th:text="${equip.ipSwitch != null and !equip.ipSwitch.isEmpty() ? equip.ipSwitch : '-'}"></td>
+                    <td th:text="${equip.portaSwitch != null and !equip.portaSwitch.isEmpty() ? equip.portaSwitch : '-'}"></td>
+                    <td th:text="${equip.rack != null and !equip.rack.isEmpty() ? equip.rack : '-'}"></td>
+                    <td th:text="${equip.patchPanel != null and !equip.patchPanel.isEmpty() ? equip.patchPanel : '-'}"></td>
+                    <td>
+                        <span th:if="${equip.obs != null and !equip.obs.isEmpty()}" class="text-secondary" th:title="${equip.obs}">
+                            <i class="fa-solid fa-comment-dots text-warning me-1"></i>
+                            <span th:text="${#strings.abbreviate(equip.obs, 25)}"></span>
+                        </span>
+                        <span th:unless="${equip.obs != null and !equip.obs.isEmpty()}">-</span>
+                    </td>
+                    <td sec:authorize="hasAnyRole('ADMIN', 'MASTER')" class="text-center">
+                        <a th:href="@{/equipamentos/editar/{id}(id=${equip.patrimonioMicro})}" class="btn btn-outline-warning btn-sm me-1" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <form th:action="@{/equipamentos/deletar/{id}(id=${equip.patrimonioMicro})}" method="post" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este equipamento?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Excluir">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL HEALTH CHECK -->
+<div class="modal fade" id="modalHealthCheck" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-heart-pulse text-info me-2"></i>Diagnóstico do Sistema & Servidor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                    <span><i class="fa-solid fa-database me-2 text-warning"></i>Banco de Dados:</span>
+                    <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i>Conectado</span>
+                </div>
+                <div class="mb-3 d-flex justify-content-between align-items-center p-2 bg-light rounded">
+                    <span><i class="fa-solid fa-clock me-2 text-primary"></i>Tempo de Atividade (Uptime):</span>
+                    <strong th:text="${uptimeMinutos + ' min'}">0 min</strong>
+                </div>
+                <div class="mb-3 p-2 bg-light rounded">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span><i class="fa-solid fa-memory me-2 text-danger"></i>Uso de Memória RAM:</span>
+                        <strong th:text="${memUsadaMb + ' MB / ' + memTotalMb + ' MB'}">0 MB</strong>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-info" role="progressbar"
+                             th:style="'width: ' + ${(memUsadaMb * 100) / memTotalMb} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 1: Importar Excel (.XLSX) -->
+<div class="modal fade" id="modalImportar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-file-import me-2"></i>Importar / Mesclar Arquivo Excel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/equipamentos/importar}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="alert alert-info py-2 small">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        <strong>Mapeamento Dinâmico:</strong> O sistema identifica os campos pelo nome da coluna do cabeçalho. Equipamentos repetidos por <strong>Netname</strong> ou <strong>Patrimônio</strong> serão mesclados automaticamente.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Selecione o arquivo Excel (.xlsx)</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold">Processar Arquivo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Copiar e Colar Texto -->
+<div class="modal fade" id="modalColarTexto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-paste me-2"></i>Copiar e Colar Vários Itens da Planilha</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/equipamentos/importar-texto}" method="post">
+                <div class="modal-body">
+                    <div class="alert alert-warning py-2 small">
+                        <i class="fa-solid fa-lightbulb me-1"></i>
+                        Copie as linhas da sua planilha (incluindo o cabeçalho) no Excel e cole diretamente na caixa de texto abaixo.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Cole o texto aqui (Cabeçalho + Linhas):</label>
+                        <textarea name="textoColado" class="form-control font-monospace small" rows="10" placeholder="Netname   Pat Micro  Express Service    Service Tag...
+HC3-GUA01   805703 4638660626 24PQLG2...
+HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success btn-sm fw-bold"><i class="fa-solid fa-circle-check me-1"></i>Processar e Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        filtrarTabela();
+    });
+
+    // VARIAVEIS DE DIREÇÃO DA ORDENAÇÃO
+    let direcaoOrdenacao = {};
+
+    function ordenarTabela(colunaIdx) {
+        let table = document.getElementById("tabelaCorpo");
+        let linhas = Array.from(table.querySelectorAll("tr"));
+
+        // Se a linha for o aviso de "nenhum equipamento", ignora
+        if (linhas.length === 1 && linhas[0].querySelectorAll("td").length < 17) return;
+
+        // Alterna entre crescente (asc) e decrescente (desc)
+        direcaoOrdenacao[colunaIdx] = !direcaoOrdenacao[colunaIdx];
+        let asc = direcaoOrdenacao[colunaIdx];
+
+        linhas.sort((rowA, rowB) => {
+            let cellA = rowA.querySelectorAll("td")[colunaIdx].innerText.trim();
+            let cellB = rowB.querySelectorAll("td")[colunaIdx].innerText.trim();
+
+            // Tenta converter para número caso a coluna seja numérica (ex: Patrimônio)
+            let numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ""));
+            let numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ""));
+
+            if (!isNaN(numA) && !isNaN(numB) && cellA.match(/^\d+$/) && cellB.match(/^\d+$/)) {
+                return asc ? numA - numB : numB - numA;
+            }
+
+            return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        });
+
+        // Reanexa as linhas ordenadas no corpo da tabela
+        linhas.forEach(row => table.appendChild(row));
+
+        // Re-aplica os filtros e a zebragem de cores
+        filtrarTabela();
+
+        // Atualiza os ícones visualmente nos cabeçalhos
+        atualizarIconesOrdenacao(colunaIdx, asc);
+    }
+
+    function atualizarIconesOrdenacao(colunaIdx, asc) {
+        let ths = document.querySelectorAll("#tabelaEquipamentos th");
+        ths.forEach((th, idx) => {
+            let icone = th.querySelector("i");
+            if (icone) {
+                if (idx === colunaIdx) {
+                    icone.className = asc ? "fa-solid fa-sort-up ms-1 text-info" : "fa-solid fa-sort-down ms-1 text-info";
+                } else {
+                    icone.className = "fa-solid fa-sort ms-1 opacity-50";
+                }
+            }
+        });
+    }
+
+    function alternarFiltroBase() {
+        let selectUnidade = document.getElementById("filterUnidade");
+        let label = document.getElementById("labelBaseDados");
+
+        if (selectUnidade.value === "") {
+            selectUnidade.value = "HC3";
+            label.innerText = "Somente HC3";
+        } else if (selectUnidade.value === "HC3") {
+            selectUnidade.value = "HC4";
+            label.innerText = "Somente HC4";
+        } else {
+            selectUnidade.value = "";
+            label.innerText = "HC3 & HC4 Unificados";
+        }
+        filtrarTabela();
+    }
+
+    function sincronizarEFiltrar() {
+        let selectUnidade = document.getElementById("filterUnidade").value;
+        let label = document.getElementById("labelBaseDados");
+
+        if (selectUnidade === "HC3") {
+            label.innerText = "Somente HC3";
+        } else if (selectUnidade === "HC4") {
+            label.innerText = "Somente HC4";
+        } else {
+            label.innerText = "HC3 & HC4 Unificados";
+        }
+        filtrarTabela();
+    }
+
+    function toggleFiltroDetalhado() {
+        let painel = document.getElementById("painelFiltroDetalhado");
+        let btn = document.getElementById("btnToggleFiltro");
+
+        if (painel.style.display === "none" || painel.style.display === "") {
+            painel.style.display = "flex";
+            btn.innerHTML = '<i class="fa-solid fa-magnifying-glass me-1"></i> Filtragem geral';
+            btn.classList.remove("btn-outline-primary");
+            btn.classList.add("btn-outline-secondary");
+        } else {
+            painel.style.display = "none";
+            btn.innerHTML = '<i class="fa-solid fa-sliders me-1"></i> Filtragem mais detalhada';
+            btn.classList.remove("btn-outline-secondary");
+            btn.classList.add("btn-outline-primary");
+        }
+    }
+
+    function filtrarTabela() {
+        let filtroUnidade = document.getElementById("filterUnidade").value.toUpperCase();
+        let filtroNetname = document.getElementById("filterNetname").value.toUpperCase();
+        let filtroModelo  = document.getElementById("filterModelo").value.toUpperCase();
+        let filtroLocal   = document.getElementById("filterLocal").value.toUpperCase();
+        let filtroAndar   = document.getElementById("filterAndar").value.toUpperCase();
+        let filtroGeral   = document.getElementById("filterGeral").value.toUpperCase();
+
+        let table = document.getElementById("tabelaCorpo");
+        let tr = table.getElementsByTagName("tr");
+        let contadorVisivel = 0;
+
+        for (let i = 0; i < tr.length; i++) {
+            let tds = tr[i].getElementsByTagName("td");
+            if (tds.length < 17) continue;
+
+            let txtUnidade = (tds[0].textContent || tds[0].innerText).toUpperCase();
+            let txtNetname = (tds[2].textContent || tds[2].innerText).toUpperCase();
+            let txtModelo  = (tds[3].textContent || tds[3].innerText).toUpperCase();
+            let txtLocal   = (tds[7].textContent || tds[7].innerText).toUpperCase();
+            let txtAndar   = (tds[8].textContent || tds[8].innerText).toUpperCase();
+            let txtLinhaCompleta = (tr[i].textContent || tr[i].innerText).toUpperCase();
+
+            let matchUnidade = (filtroUnidade === "" || txtUnidade.indexOf(filtroUnidade) > -1);
+            let matchNetname = (filtroNetname === "" || txtNetname.indexOf(filtroNetname) > -1);
+            let matchModelo  = (filtroModelo === ""  || txtModelo.indexOf(filtroModelo) > -1);
+            let matchLocal   = (filtroLocal === ""   || txtLocal.indexOf(filtroLocal) > -1);
+            let matchAndar   = (filtroAndar === ""   || txtAndar.indexOf(filtroAndar) > -1);
+            let matchGeral   = (filtroGeral === ""   || txtLinhaCompleta.indexOf(filtroGeral) > -1);
+
+            if (matchUnidade && matchNetname && matchModelo && matchLocal && matchAndar && matchGeral) {
+                tr[i].style.display = "";
+                contadorVisivel++;
+
+                tr[i].classList.remove("linha-impar", "linha-par");
+                if (contadorVisivel % 2 === 0) {
+                    tr[i].classList.add("linha-par");
+                } else {
+                    tr[i].classList.add("linha-impar");
+                }
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+
+    function limparFiltros() {
+        document.getElementById("filterUnidade").value = "";
+        document.getElementById("filterNetname").value = "";
+        document.getElementById("filterModelo").value = "";
+        document.getElementById("filterLocal").value = "";
+        document.getElementById("filterAndar").value = "";
+        document.getElementById("filterGeral").value = "";
+        sincronizarEFiltrar();
+    }
+
+    function exportarExcelFiltrado() {
+        let unidade = encodeURIComponent(document.getElementById("filterUnidade").value);
+        let netname = encodeURIComponent(document.getElementById("filterNetname").value);
+        let modelo  = encodeURIComponent(document.getElementById("filterModelo").value);
+        let local   = encodeURIComponent(document.getElementById("filterLocal").value);
+        let andar   = encodeURIComponent(document.getElementById("filterAndar").value);
+        let geral   = encodeURIComponent(document.getElementById("filterGeral").value);
+
+        let url = `/equipamentos/exportar?unidade=${unidade}&netname=${netname}&modelo=${modelo}&local=${local}&andar=${andar}&geral=${geral}`;
+        window.location.href = url;
+    }
+</script>
+</body>
+</html>
