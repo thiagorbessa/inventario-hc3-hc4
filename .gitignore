@@ -1,5 +1,6 @@
+.env
+/target/
 out/
-target/
 .idea/
 *.iml
 
@@ -7,6 +8,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+
 
 ### IDEs e Editores ###
 .idea/
