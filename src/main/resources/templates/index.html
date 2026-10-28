@@ -10,6 +10,36 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Arquivo CSS Externo via Thymeleaf -->
     <link rel="stylesheet" th:href="@{/css/estilo.css}">
+
+    <style>
+        /* Ajustes de responsividade e tabela compacta */
+        .table-responsive {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .table-custom {
+            font-size: 0.80rem !important; /* Diminui levemente a fonte */
+            width: 100% !important;
+        }
+
+        .table-custom th,
+        .table-custom td {
+            padding: 5px 6px !important; /* Compacta espaçamento das células */
+            vertical-align: middle;
+            white-space: nowrap; /* Impede quebras indesejadas em dados curtos */
+        }
+
+        /* Coluna Local quebra linha para não esticar a tela */
+        .table-custom td.col-local,
+        .table-custom th.col-local {
+            white-space: normal !important;
+            min-width: 140px;
+            max-width: 200px;
+            word-break: break-word;
+        }
+    </style>
 </head>
 <body>
 
@@ -191,7 +221,7 @@
             </div>
         </div>
 
-        <!-- Tabela com Cabeçalhos Clicáveis para Ordenação -->
+        <!-- Tabela Ajustada para Caber na Tela -->
         <div class="table-responsive">
             <table class="table table-hover align-middle table-custom small" id="tabelaEquipamentos">
                 <thead>
@@ -203,14 +233,15 @@
                     <th onclick="ordenarTabela(4)">Service Tag <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(5)">IP Micro <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(6)">MAC Address <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th onclick="ordenarTabela(7)">Local <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th class="col-local" onclick="ordenarTabela(7)">Local <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(8)">Andar <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(9)">Ramal <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(10)">Pat. Monitor <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th onclick="ordenarTabela(11)">IP Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th onclick="ordenarTabela(12)">Porta Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th onclick="ordenarTabela(13)">Rack <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th onclick="ordenarTabela(14)">Patch Panel <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <!-- Colunas secundárias visíveis apenas em telas XL -->
+                    <th class="d-none d-xl-table-cell" onclick="ordenarTabela(11)">IP Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th class="d-none d-xl-table-cell" onclick="ordenarTabela(12)">Porta Switch <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th class="d-none d-xl-table-cell" onclick="ordenarTabela(13)">Rack <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th class="d-none d-xl-table-cell" onclick="ordenarTabela(14)">Patch Panel <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(15)">Obs <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th sec:authorize="hasAnyRole('ADMIN', 'MASTER')" class="text-center">Ações</th>
                 </tr>
@@ -232,14 +263,14 @@
                     <td th:text="${equip.serviceTag != null and !equip.serviceTag.isEmpty() ? equip.serviceTag : '-'}"></td>
                     <td th:text="${equip.ipMicro != null and !equip.ipMicro.isEmpty() ? equip.ipMicro : '-'}"></td>
                     <td class="font-monospace" th:text="${equip.macAddress != null and !equip.macAddress.isEmpty() ? equip.macAddress : '-'}"></td>
-                    <td th:text="${equip.local != null and !equip.local.isEmpty() ? equip.local : '-'}"></td>
+                    <td class="col-local" th:text="${equip.local != null and !equip.local.isEmpty() ? equip.local : '-'}"></td>
                     <td th:text="${equip.andar != null and !equip.andar.isEmpty() ? equip.andar : '-'}"></td>
                     <td th:text="${equip.ramal != null and !equip.ramal.isEmpty() ? equip.ramal : '-'}"></td>
                     <td th:text="${equip.patrimonioMonitor != null and !equip.patrimonioMonitor.isEmpty() ? equip.patrimonioMonitor : '-'}"></td>
-                    <td th:text="${equip.ipSwitch != null and !equip.ipSwitch.isEmpty() ? equip.ipSwitch : '-'}"></td>
-                    <td th:text="${equip.portaSwitch != null and !equip.portaSwitch.isEmpty() ? equip.portaSwitch : '-'}"></td>
-                    <td th:text="${equip.rack != null and !equip.rack.isEmpty() ? equip.rack : '-'}"></td>
-                    <td th:text="${equip.patchPanel != null and !equip.patchPanel.isEmpty() ? equip.patchPanel : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:text="${equip.ipSwitch != null and !equip.ipSwitch.isEmpty() ? equip.ipSwitch : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:text="${equip.portaSwitch != null and !equip.portaSwitch.isEmpty() ? equip.portaSwitch : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:text="${equip.rack != null and !equip.rack.isEmpty() ? equip.rack : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:text="${equip.patchPanel != null and !equip.patchPanel.isEmpty() ? equip.patchPanel : '-'}"></td>
                     <td>
                         <span th:if="${equip.obs != null and !equip.obs.isEmpty()}" class="text-secondary" th:title="${equip.obs}">
                             <i class="fa-solid fa-comment-dots text-warning me-1"></i>
@@ -378,10 +409,8 @@ HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
         let table = document.getElementById("tabelaCorpo");
         let linhas = Array.from(table.querySelectorAll("tr"));
 
-        // Se a linha for o aviso de "nenhum equipamento", ignora
         if (linhas.length === 1 && linhas[0].querySelectorAll("td").length < 17) return;
 
-        // Alterna entre crescente (asc) e decrescente (desc)
         direcaoOrdenacao[colunaIdx] = !direcaoOrdenacao[colunaIdx];
         let asc = direcaoOrdenacao[colunaIdx];
 
@@ -389,7 +418,6 @@ HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
             let cellA = rowA.querySelectorAll("td")[colunaIdx].innerText.trim();
             let cellB = rowB.querySelectorAll("td")[colunaIdx].innerText.trim();
 
-            // Tenta converter para número caso a coluna seja numérica (ex: Patrimônio)
             let numA = parseFloat(cellA.replace(/[^0-9.-]+/g, ""));
             let numB = parseFloat(cellB.replace(/[^0-9.-]+/g, ""));
 
@@ -400,13 +428,8 @@ HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
             return asc ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
         });
 
-        // Reanexa as linhas ordenadas no corpo da tabela
         linhas.forEach(row => table.appendChild(row));
-
-        // Re-aplica os filtros e a zebragem de cores
         filtrarTabela();
-
-        // Atualiza os ícones visualmente nos cabeçalhos
         atualizarIconesOrdenacao(colunaIdx, asc);
     }
 
