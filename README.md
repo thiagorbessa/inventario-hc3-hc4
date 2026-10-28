@@ -125,6 +125,28 @@ O terminal exibirá a URL pública gerada:   PlaintextForwarding     [https://xx
 Copie o link https://...ngrok-free.app e acesse de qualquer lugar.
 Na primeira visita, clique em "Visit Site" na tela de aviso do ngrok para acessar a tela de login do inventário.
 
+Passo a Passo para criar o túnel público:
+Certifique-se de que a aplicação está rodando no Docker:
+No PowerShell, confirme que os containers estão ativos rodando:
+
+PowerShell
+docker ps
+(A aplicação deve estar rodando na porta 8080).
+
+Gerar o novo link público do Cloudflare:
+No terminal do PowerShell (ou CMD), execute o comando para forçar o protocolo HTTP/2 (evitando bloqueios de rede/firewall):
+
+PowerShell
+cloudflared tunnel --protocol http2 --url http://localhost:8080
+Copiar a nova URL gerada:
+Após alguns segundos, o terminal exibirá uma caixa no formato:
+
+Plaintext
++-----------------------------------------------------------------------------------+
+| Your quick Tunnel has been created! Visit it at:                                 |
+| https://xxxxxxxx-xxxx-xxxx.trycloudflare.com                                      |
++------------------------------------------------------------------
+
 🔑 Acesso Inicial ao Sistema
 Ao acessar a aplicação pela primeira vez, utilize as credenciais padrão de administrador:
 
