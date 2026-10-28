@@ -12,7 +12,7 @@
     <link rel="stylesheet" th:href="@{/css/estilo.css}">
 
     <style>
-        /* Ajusta o container para respeitar os limites do iframe ou janela */
+        /* Container responsivo da tabela com rolagem nativa */
         .table-responsive {
             max-height: 70vh;
             overflow-y: auto;
@@ -22,26 +22,23 @@
             width: 100%;
         }
 
-        /* Força a tabela a ocupar toda a largura disponível no iframe */
+        /* Estrutura base da tabela */
         .table-custom {
             font-size: 0.81rem !important;
             width: 100% !important;
+            min-width: 1500px; /* Garante que a tabela não esmague as colunas em telas pequenas */
             margin-bottom: 0;
+            table-layout: fixed; /* Força o alinhamento e divisão igualitária das colunas */
         }
 
+        /* Células truncadas (corta o texto longo e adiciona "...") */
         .table-custom th,
         .table-custom td {
             padding: 6px 8px !important;
             vertical-align: middle;
             white-space: nowrap !important;
-        }
-
-        /* Trata a coluna LOCAL para evitar que force a barra de rolagem no iframe */
-        .table-custom .col-local {
-            max-width: 180px;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap !important;
         }
 
         /* Cabeçalho fixo no topo durante a rolagem */
@@ -192,7 +189,10 @@
                 <div class="col-md-9">
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" id="filterGeral" class="form-control border-start-0" placeholder="Filtragem geral (busque por qualquer dado: Patrimônio, IP, Local...)" onkeyup="filtrarTabela()">
+                        <input type="text" id="filterGeral" class="form-control border-start-0 border-end-0" placeholder="Filtragem geral (busque por qualquer dado: Patrimônio, IP, Local...)" onkeyup="filtrarTabela()">
+                        <button class="btn btn-white bg-white border border-start-0 text-muted" type="button" onclick="limparTudo()" title="Limpar todos os filtros">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="col-md-3 text-end">
@@ -233,7 +233,7 @@
                 </div>
 
                 <div class="col-md-1">
-                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="limparFiltros()" title="Limpar Filtros">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100" onclick="limparTudo()" title="Limpar todos os Filtros">
                         <i class="fa-solid fa-filter-circle-xmark"></i>
                     </button>
                 </div>
@@ -252,7 +252,7 @@
                     <th onclick="ordenarTabela(4)">Service Tag <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(5)">IP Micro <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(6)">MAC Address <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
-                    <th class="col-local" onclick="ordenarTabela(7)">Local <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
+                    <th onclick="ordenarTabela(7)">Local <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(8)">Andar <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(9)">Ramal <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
                     <th onclick="ordenarTabela(10)">Pat. Monitor <i class="fa-solid fa-sort ms-1 opacity-50"></i></th>
@@ -272,24 +272,25 @@
                         Nenhum equipamento cadastrado na base unificada.
                     </td>
                 </tr>
+                <!-- Usando th:title em todas as colunas para o hover -->
                 <tr th:each="equip : ${equipamentos}">
-                    <td>
+                    <td th:title="${equip.unidade}">
                         <span class="badge" th:classappend="${equip.unidade == 'HC3'} ? 'badge-hc3' : 'badge-hc4'" th:text="${equip.unidade != null ? equip.unidade : 'HC3'}">HC3</span>
                     </td>
-                    <td class="fw-bold text-dark" th:text="${equip.patrimonioMicro}">-</td>
-                    <td th:text="${equip.netname != null and !equip.netname.isEmpty() ? equip.netname : '-'}"></td>
-                    <td th:text="${equip.modeloMicro != null and !equip.modeloMicro.isEmpty() ? equip.modeloMicro : '-'}"></td>
-                    <td th:text="${equip.serviceTag != null and !equip.serviceTag.isEmpty() ? equip.serviceTag : '-'}"></td>
-                    <td th:text="${equip.ipMicro != null and !equip.ipMicro.isEmpty() ? equip.ipMicro : '-'}"></td>
-                    <td class="font-monospace" th:text="${equip.macAddress != null and !equip.macAddress.isEmpty() ? equip.macAddress : '-'}"></td>
-                    <td class="col-local" th:text="${equip.local != null and !equip.local.isEmpty() ? equip.local : '-'}"></td>
-                    <td th:text="${equip.andar != null and !equip.andar.isEmpty() ? equip.andar : '-'}"></td>
-                    <td th:text="${equip.ramal != null and !equip.ramal.isEmpty() ? equip.ramal : '-'}"></td>
-                    <td th:text="${equip.patrimonioMonitor != null and !equip.patrimonioMonitor.isEmpty() ? equip.patrimonioMonitor : '-'}"></td>
-                    <td class="d-none d-xl-table-cell" th:text="${equip.ipSwitch != null and !equip.ipSwitch.isEmpty() ? equip.ipSwitch : '-'}"></td>
-                    <td class="d-none d-xl-table-cell" th:text="${equip.portaSwitch != null and !equip.portaSwitch.isEmpty() ? equip.portaSwitch : '-'}"></td>
-                    <td class="d-none d-xl-table-cell" th:text="${equip.rack != null and !equip.rack.isEmpty() ? equip.rack : '-'}"></td>
-                    <td class="d-none d-xl-table-cell" th:text="${equip.patchPanel != null and !equip.patchPanel.isEmpty() ? equip.patchPanel : '-'}"></td>
+                    <td class="fw-bold text-dark" th:title="${equip.patrimonioMicro}" th:text="${equip.patrimonioMicro}">-</td>
+                    <td th:title="${equip.netname}" th:text="${equip.netname != null and !equip.netname.isEmpty() ? equip.netname : '-'}"></td>
+                    <td th:title="${equip.modeloMicro}" th:text="${equip.modeloMicro != null and !equip.modeloMicro.isEmpty() ? equip.modeloMicro : '-'}"></td>
+                    <td th:title="${equip.serviceTag}" th:text="${equip.serviceTag != null and !equip.serviceTag.isEmpty() ? equip.serviceTag : '-'}"></td>
+                    <td th:title="${equip.ipMicro}" th:text="${equip.ipMicro != null and !equip.ipMicro.isEmpty() ? equip.ipMicro : '-'}"></td>
+                    <td class="font-monospace" th:title="${equip.macAddress}" th:text="${equip.macAddress != null and !equip.macAddress.isEmpty() ? equip.macAddress : '-'}"></td>
+                    <td th:title="${equip.local}" th:text="${equip.local != null and !equip.local.isEmpty() ? equip.local : '-'}"></td>
+                    <td th:title="${equip.andar}" th:text="${equip.andar != null and !equip.andar.isEmpty() ? equip.andar : '-'}"></td>
+                    <td th:title="${equip.ramal}" th:text="${equip.ramal != null and !equip.ramal.isEmpty() ? equip.ramal : '-'}"></td>
+                    <td th:title="${equip.patrimonioMonitor}" th:text="${equip.patrimonioMonitor != null and !equip.patrimonioMonitor.isEmpty() ? equip.patrimonioMonitor : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:title="${equip.ipSwitch}" th:text="${equip.ipSwitch != null and !equip.ipSwitch.isEmpty() ? equip.ipSwitch : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:title="${equip.portaSwitch}" th:text="${equip.portaSwitch != null and !equip.portaSwitch.isEmpty() ? equip.portaSwitch : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:title="${equip.rack}" th:text="${equip.rack != null and !equip.rack.isEmpty() ? equip.rack : '-'}"></td>
+                    <td class="d-none d-xl-table-cell" th:title="${equip.patchPanel}" th:text="${equip.patchPanel != null and !equip.patchPanel.isEmpty() ? equip.patchPanel : '-'}"></td>
                     <td>
                         <span th:if="${equip.obs != null and !equip.obs.isEmpty()}" class="text-secondary" th:title="${equip.obs}">
                             <i class="fa-solid fa-comment-dots text-warning me-1"></i>
@@ -560,16 +561,19 @@ HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
         }
     }
 
-    function limparFiltros() {
+    // Função unificada para limpar busca geral e filtro detalhado simultaneamente
+    function limparTudo() {
         document.getElementById("filterUnidade").value = "";
         document.getElementById("filterNetname").value = "";
         document.getElementById("filterModelo").value = "";
         document.getElementById("filterLocal").value = "";
         document.getElementById("filterAndar").value = "";
         document.getElementById("filterGeral").value = "";
+
         sincronizarEFiltrar();
     }
 
+    // Função completada que havia vindo cortada na sua mensagem
     function exportarExcelFiltrado() {
         let unidade = encodeURIComponent(document.getElementById("filterUnidade").value);
         let netname = encodeURIComponent(document.getElementById("filterNetname").value);
@@ -578,9 +582,10 @@ HC4-INF01   805718 4628302994 24JKLG2..." required></textarea>
         let andar   = encodeURIComponent(document.getElementById("filterAndar").value);
         let geral   = encodeURIComponent(document.getElementById("filterGeral").value);
 
-        let url = `/equipamentos/exportar?unidade=${unidade}&netname=${netname}&modelo=${modelo}&local=${local}&andar=${andar}&geral=${geral}`;
-        window.location.href = url;
+        // Supondo que você tenha um endpoint para exportar, essa é a rota padrão de exportação passando os filtros:
+        window.location.href = `/equipamentos/exportar?unidade=${unidade}&netname=${netname}&modelo=${modelo}&local=${local}&andar=${andar}&geral=${geral}`;
     }
 </script>
+
 </body>
 </html>

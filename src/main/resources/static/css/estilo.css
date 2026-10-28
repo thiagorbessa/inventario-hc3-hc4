@@ -167,3 +167,53 @@ body {
 .form-control {
     border-radius: 6px;
 }
+
+
+     /* Container responsivo com rolagem nativa */
+ .table-responsive {
+     max-height: 70vh;
+     overflow-y: auto;
+     overflow-x: auto;
+     border: 1px solid #e2e8f0;
+     border-radius: 8px;
+     width: 100%;
+ }
+
+/* FORÇA A TABELA A MANTER A LARGURA FIXA (NÃO ENCOLHE AO FILTRAR) */
+.table-custom {
+    font-size: 0.81rem !important;
+    min-width: 1600px !important; /* Trava a largura total das 16 colunas */
+    width: 100% !important;
+    margin-bottom: 0;
+    table-layout: fixed; /* Força colunas com tamanhos proporcionais e fixos */
+}
+
+.table-custom th,
+.table-custom td {
+    padding: 8px 10px !important;
+    vertical-align: middle;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Textos muito longos ganham '...' em vez de esticar */
+}
+
+/* Definindo larguras específicas para colunas críticas */
+.table-custom th:nth-child(1), .table-custom td:nth-child(1) { width: 80px; }  /* Unidade */
+.table-custom th:nth-child(2), .table-custom td:nth-child(2) { width: 100px; } /* Pat. Micro */
+.table-custom th:nth-child(3), .table-custom td:nth-child(3) { width: 120px; } /* Netname */
+.table-custom th:nth-child(8), .table-custom td:nth-child(8) { width: 220px; } /* Local */
+
+/* Fixa o cabeçalho no topo durante a rolagem */
+.table-custom th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    cursor: pointer;
+    user-select: none;
+}
+
+.table-custom th:hover {
+    background-color: #1e293b !important;
+}
