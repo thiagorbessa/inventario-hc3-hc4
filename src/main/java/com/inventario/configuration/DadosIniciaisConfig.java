@@ -14,7 +14,8 @@ public class DadosIniciaisConfig {
     @Bean
     public CommandLineRunner carregarDadosIniciais(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (!usuarioRepository.existsByUsername("admin")) {
+            // SOLUÇÃO: Verifica se o banco não tem NENHUM usuário cadastrado
+            if (usuarioRepository.count() == 0) {
                 Usuario master = Usuario.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin123"))
